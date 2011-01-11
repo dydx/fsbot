@@ -42,22 +42,32 @@ type IRCClient( h : string, p : int, c : string, n : string ) =
     this.Write( sprintf "PONG %s" host)
 
   // identify with server
-  member this.Identify( nick : string ) =
+  member this.Identify =
     this.Write( sprintf "USER %s %s %s %s" nick nick nick nick )
     this.Write( sprintf "NICK %s" nick )
 
   // join a given room
-  member this.Join( chan : string ) =
+  member this.Join =
     this.Write( sprintf "JOIN %s" chan )
 
   // talk to the room
-  member this.Privmsg( chan : string, msg : string ) =
+  member this.Privmsg( msg : string ) =
     this.Write( sprintf "PRIVMSG %s %s" chan msg )
 
   // quit the IRC
   member this.Quit =
     this.Write( sprintf "QUIT" )
 
-  member this.Homeostasus =
-    do this.Connect
-    do this.Indentify 
+  member this.Homeostasis =
+    do this.Connect   // connect to server
+    do this.Indentify // identify with server
+    do this.Join      // join a room
+    Console.WriteLine( sprintf "Successfully joined %s on %s:%s as %s" chan host port nick)
+    let mutable line = null
+    while( (line <- this.Read) != null )
+      if( line.Contains("PING")) then
+        this.Pong
+      let msg = line.Substring( line.Substring(1).IndexOf(":") + 2)
+      if (msg.Contains("*help")) then
+        this.Privmsg( "What do you want now?" )
+
