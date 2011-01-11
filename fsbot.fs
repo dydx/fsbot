@@ -23,49 +23,43 @@ type IRCClient( h : string, p : int, c : string, n : string ) =
   let nick = n
   let conn = new TcpClient()
 
-  // read from the output stream
-  member this.Read =
-    let sr = new StreamReader( conn.GetStream() )
-    sr.ReadLine()
-
-  // write to the output stream
-  member this.Write( msg : string ) =
-    let sw = new StreamWriter( conn.GetStream() )
-    sw.WriteLine( sprintf "%s\n" msg )
-    sw.Flush()
+  // gather up the stream processing stuffs
+  let sr = new StreamReader( conn.GetStream() )
+  let sw = new StreamWriter( conn.GetStream() )
+  sw.AutoFlush <- true
   
   // connect to the server
   member this.Connect =
     conn.Connect( host, port )
 
   member this.Pong =
-    this.Write( sprintf "PONG %s" host)
+    sw.WriteLine( sprintf "PONG %s\n" host)
 
   // identify with server
   member this.Identify =
-    this.Write( sprintf "USER %s %s %s %s" nick nick nick nick )
-    this.Write( sprintf "NICK %s" nick )
+    sw.WriteLine( sprintf "USER %s %s %s %s\n" nick nick nick nick )
+    sw.WriteLine( sprintf "NICK %s\n" nick )
 
   // join a given room
   member this.Join =
-    this.Write( sprintf "JOIN %s" chan )
+    sw.WriteLine( sprintf "JOIN %s\n" chan )
 
   // talk to the room
   member this.Privmsg( msg : string ) =
-    this.Write( sprintf "PRIVMSG %s %s" chan msg )
+    sw.WriteLine( sprintf "PRIVMSG %s %s\n" chan msg )
 
   // quit the IRC
   member this.Quit =
-    this.Write( sprintf "QUIT" )
+    sw.WriteLine( sprintf "QUIT\n" )
 
   member this.Homeostasis =
     do this.Connect   // connect to server
-    do this.Indentify // identify with server
+    do this.Identify // identify with server
     do this.Join      // join a room
-    Console.WriteLine( sprintf "Successfully joined %s on %s:%s as %s" chan host port nick)
-    let mutable line = null
-    while( (line <- this.Read) != null )
-      if( line.Contains("PING")) then
+    Console.WriteLine( sprintf "Successfully joined %s on %s:%d as %s\n" chan host port nick)
+    while( sr.EndOfStream = false ) do
+      let line = sr.ReadLine()
+      if (line.Contains("PING")) then
         this.Pong
       let msg = line.Substring( line.Substring(1).IndexOf(":") + 2)
       if (msg.Contains("*help")) then
