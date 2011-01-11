@@ -15,10 +15,12 @@ let port    = 6697
 let channel = "#bots"
 let nick    = "ishbot"
 
-type IRCClient( h : string, p = int ) =
+type IRCClient( h : string, p : int, c : string, n : string ) =
 
   let host = h
   let port = p
+  let chan = c
+  let nick = n
   let conn = new TcpClient()
 
   // read from the output stream
@@ -55,3 +57,7 @@ type IRCClient( h : string, p = int ) =
   // quit the IRC
   member this.Quit =
     this.Write( sprintf "QUIT" )
+
+  member this.Homeostasus =
+    do this.Connect
+    do this.Indentify 
