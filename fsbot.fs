@@ -26,7 +26,6 @@ type IRCClient( h : string, p : int, c : string, n : string ) =
   // gather up the stream processing stuffs
   let sr = new StreamReader( conn.GetStream() )
   let sw = new StreamWriter( conn.GetStream() )
-  sw.AutoFlush <- true
   
   // connect to the server
   member this.Connect =
@@ -34,25 +33,30 @@ type IRCClient( h : string, p : int, c : string, n : string ) =
 
   member this.Pong =
     sw.WriteLine( sprintf "PONG %s\n" host)
+    sw.Flush()
 
   // identify with server
   member this.Identify =
     sw.WriteLine( sprintf "USER %s %s %s %s\n" nick nick nick nick )
     sw.WriteLine( sprintf "NICK %s\n" nick )
+    sw.Flush()
 
   // join a given room
   member this.Join =
     sw.WriteLine( sprintf "JOIN %s\n" chan )
+    sw.Flush()
 
   // talk to the room
   member this.Privmsg( msg : string ) =
     sw.WriteLine( sprintf "PRIVMSG %s %s\n" chan msg )
+    sw.Flush()
 
   // quit the IRC
   member this.Quit =
     sw.WriteLine( sprintf "QUIT\n" )
+    sw.Flush()
 
-  member this.Homeostasis =
+  member this.Run =
     do this.Connect   // connect to server
     do this.Identify // identify with server
     do this.Join      // join a room
@@ -64,4 +68,8 @@ type IRCClient( h : string, p : int, c : string, n : string ) =
       let msg = line.Substring( line.Substring(1).IndexOf(":") + 2)
       if (msg.Contains("*help")) then
         this.Privmsg( "What do you want now?" )
+
+// Lets actually use this badboy!
+let fsbot = new IRCClient( server, port, channel, nick )
+fsbot.Run
 
