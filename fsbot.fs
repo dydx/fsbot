@@ -12,31 +12,46 @@ open System.Net.Sockets
 
 let server  = "irc.enigmagroup.org"
 let port    = 6697
-let channel = "#enigmagroup"
+let channel = "#bots"
 let nick    = "ishbot"
 
-(*
-  Handle the basics of connecting to IRC
-*)
+type IRCClient( h : string, p = int ) =
 
-type IRCClient( host : string, port = int ) =
-  do printf "Connecting to %s:%d" host port
-  
+  let host = h
+  let port = p
   let conn = new TcpClient()
-  let reader = new StreamReader( conn.GetStream() )
-  let writer = new StreamWriter( conn.GetStream() )
-  writer.AutoFlush <- true
+
+  // read from the output stream
+  member this.Read =
+    let sr = new StreamReader( conn.GetStream() )
+    sr.ReadLine()
+
+  // write to the output stream
+  member this.Write( msg : string ) =
+    let sw = new StreamWriter( conn.GetStream() )
+    sw.WriteLine( sprintf "%s\n" msg )
+    sw.Flush()
   
   // connect to the server
   member this.Connect =
     conn.Connect( host, port )
 
+  member this.Pong =
+    this.Write( sprintf "PONG %s" host)
+
   // identify with server
-  member this.Identify( nick : string )
-    writer.WriteLine( sprintf "USER %s %s %s %s\n" nick nick nick nick )
-    writer.WriteLine( sprintf "NICK %s\n" nick )
+  member this.Identify( nick : string ) =
+    this.Write( sprintf "USER %s %s %s %s" nick nick nick nick )
+    this.Write( sprintf "NICK %s" nick )
 
   // join a given room
-  member this.Join( chan : string )
-    writer.WriteLine( sprintf "JOIN %s\n" chan )
-  
+  member this.Join( chan : string ) =
+    this.Write( sprintf "JOIN %s" chan )
+
+  // talk to the room
+  member this.Privmsg( chan : string, msg : string ) =
+    this.Write( sprintf "PRIVMSG %s %s" chan msg )
+
+  // quit the IRC
+  member this.Quit =
+    this.Write( sprintf "QUIT" )
