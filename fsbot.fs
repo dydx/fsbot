@@ -10,11 +10,6 @@ open System.IO
 open System.Net
 open System.Net.Sockets
 
-let server  = "irc.enigmagroup.org"
-let port    = 6667
-let channel = "#bots"
-let nick    = "ishbot"
-
 type IRCClient( h : string, p : int, c : string, n : string ) =
 
   let host = h
@@ -79,6 +74,9 @@ type IRCClient( h : string, p : int, c : string, n : string ) =
 
 
 // Lets actually use this badboy!
-let fsbot = new IRCClient( server, port, channel, nick )
+let (host:string)   = "irc.enigmagroup.org"
+let (port:int)      = 6697
+let (chan:string)   = "#enigmagroup"
+let (nick:string)   = "SomeNoob"
+let fsbot = new IRCClient( host, port, chan, nick )  
 fsbot.Run
-
