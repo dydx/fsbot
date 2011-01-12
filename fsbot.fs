@@ -66,12 +66,14 @@ type IRCClient( h : string, p : int, c : string, n : string ) =
       let (|Prefix|_|)(p:string)(s:string) =
         if s.StartsWith( p ) then
           Some( s.Substring(p.Length))
-        else
+         else
           None
+          
       match msg with
       | Prefix "!version" rest -> this.Privmsg ( sprintf "%s on %A" nick Environment.Version )
       | Prefix "!date" rest -> this.Privmsg ( sprintf "%A" System.DateTime.Now )
       | Prefix "!help" rest -> this.Privmsg "Google it for now..."
+      | _ -> Console.WriteLine( msg )
        
 
 
