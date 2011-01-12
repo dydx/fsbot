@@ -75,8 +75,8 @@ type IRCClient( h : string, p : int, c : string, n : string ) =
 
 // Lets actually use this badboy!
 let (host:string)   = "irc.enigmagroup.org"
-let (port:int)      = 6697
-let (chan:string)   = "#enigmagroup"
+let (port:int)      = 6667
+let (chan:string)   = "#bots"
 let (nick:string)   = "SomeNoob"
 let fsbot = new IRCClient( host, port, chan, nick )  
 fsbot.Run
