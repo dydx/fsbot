@@ -73,6 +73,7 @@ type IRCClient( h : string, p : int, c : string, n : string ) =
       | Prefix "!version" rest -> this.Privmsg ( sprintf "%s on %A" nick Environment.Version )
       | Prefix "!date" rest -> this.Privmsg ( sprintf "%A" System.DateTime.Now )
       | Prefix "!help" rest -> this.Privmsg "Google it for now..."
+      | Prefix "!quit" rest -> this.Quit
       | _ -> Console.WriteLine( msg )
        
 
